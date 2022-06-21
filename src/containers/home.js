@@ -13,6 +13,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Collapse from "@mui/material/Collapse";
+import "./home.css";
 
 import axios from "axios";
 
@@ -45,7 +46,6 @@ function Home() {
   useEffect(() => {
     getLocation();
   }, []);
-  console.log("esto es donde se hace el fetch", lat, lng);
 
   const fetchData = (updated1, updated2) => {
     axios({
@@ -63,7 +63,6 @@ function Home() {
       .catch(error => {
         console.log(error);
       });
-    console.log("a ver si llega", updated1, updated2);
   };
 
   useEffect(() => {
@@ -104,85 +103,87 @@ function Home() {
         setLng("-33.4569400");
         setSelectedCountry("Chile");
         break;
-      //default:
-      //Declaraciones ejecutadas cuando ninguno de los valores coincide con el valor de la expresión
-      //break;
     }
-    console.log("averr", selectedCountry);
   };
-  console.log("la data final", responseData);
 
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
-        <div>
-          <Typography variant="h2" fontSize="24">
-            Bienvenido a AppClima
-          </Typography>
-          <Typography variant="h3">
-            Esta información es en base a su ubicación.
-          </Typography>
-          <button onClick={getLocation}>Get Location</button>
-          <h1>Coordenadas de su ubicación</h1>
-          <p>{status}</p>
+      <Box sx={{ flexGrow: 1 }} className="container">
+        <h1 className="title">Bienvenido a AppClima</h1>
+        <h2 className="subtitle">
+          Esta información es en base a su ubicación.
+        </h2>
+        <button onClick={getLocation}>
+          <span className="button">Encontrar mi ubicación actual</span>
+        </button>
+        <h3 className="subtitle">Coordenadas de su ubicación</h3>
+        <Typography>{status}</Typography>
 
-          {lat && <p>Latitude: {lat}</p>}
-          {lng && <p>Longitude: {lng}</p>}
+        {lat && <p>Latitud: {lat}</p>}
+        {lng && <p>Longitud: {lng}</p>}
 
-          <FormControl sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="demo-simple-select-label">
-              Seleccione su ubicación
-            </InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={""}
-              label="Select"
-              onChange={handleChange}
-            >
-              <MenuItem value={1}>Argentina</MenuItem>
-              <MenuItem value={2}>Brasil</MenuItem>
-              <MenuItem value={3}>Uruguay</MenuItem>
-              <MenuItem value={4}>Perú</MenuItem>
-              <MenuItem value={5}>Chile</MenuItem>
-            </Select>
-          </FormControl>
-          {selectedCountry ? (
-            <Typography> País seleccionado: {selectedCountry}</Typography>
-          ) : null}
-          <Card sx={{ maxWidth: 345 }}>
-            <CardContent>
-              {responseData ? (
-                <div className="card card-body mt-2 animated fadeInUp">
-                  {responseData.main.temp && (
-                    <p>
-                      <i className="fas fa-temperature-low"></i> Temperatura:
-                      {responseData.main.temp} ℃
-                    </p>
-                  )}
-                  {responseData.weather[0].description && (
-                    <p>
-                      <i className="fas fa-temperature-low"></i> Descripción:
-                      {responseData.weather[0].description}
-                    </p>
-                  )}
-                  {responseData.main.humidity && (
-                    <p>
-                      <i className="fas fa-water"></i> Humedad:
-                      {responseData.main.humidity}
-                    </p>
-                  )}
-                  {responseData.main.wind_speed && (
-                    <p>
-                      <i className="fas fa-wind"></i> Velocidad del viento:
-                      {responseData.main.wind_speed}
-                    </p>
-                  )}
-                </div>
-              ) : null}
-            </CardContent>
-          </Card>
-        </div>
+        <FormControl sx={{ m: 1, minWidth: 250 }}>
+          <InputLabel id="demo-simple-select-label">
+            Seleccione nueva ubicación
+          </InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={""}
+            label="Select"
+            onChange={handleChange}
+            className="selector"
+          >
+            <MenuItem value={1}>Argentina</MenuItem>
+            <MenuItem value={2}>Brasil</MenuItem>
+            <MenuItem value={3}>Uruguay</MenuItem>
+            <MenuItem value={4}>Perú</MenuItem>
+            <MenuItem value={5}>Chile</MenuItem>
+          </Select>
+        </FormControl>
+        {selectedCountry ? (
+          <h3 className="button"> País seleccionado: {selectedCountry}</h3>
+        ) : null}
+        <Card sx={{ maxWidth: 345 }}>
+          <CardContent className="card">
+            {responseData ? (
+              <div className="card card-body mt-2 animated fadeInUp">
+                {responseData.main.temp && (
+                  <p>
+                    <i className="fas fa-temperature-low"></i> Temperatura:
+                    {responseData.main.temp} °
+                  </p>
+                )}
+                {responseData.weather[0].description && (
+                  <p>
+                    <i className="fas fa-temperature-low"></i> Descripción:
+                    {responseData.weather[0].description}
+                  </p>
+                )}
+                {responseData.main.humidity && (
+                  <p>
+                    <i className="fas fa-water"></i> Humedad:
+                    {responseData.main.humidity}%
+                  </p>
+                )}
+                {responseData.wind.speed && (
+                  <p>
+                    <i className="fas fa-wind"></i> Velocidad del viento:
+                    {responseData.wind.speed}km/H
+                  </p>
+                )}
+                {responseData.visibility && (
+                  <p>
+                    <i className="fas fa-wind"></i> Visibilidad:
+                    {responseData.visibility}KM
+                  </p>
+                )}
+              </div>
+            ) : (
+              "Waiting..."
+            )}
+          </CardContent>
+        </Card>
       </Box>
     </>
   );
