@@ -1,19 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
-import NativeSelect from "@mui/material/NativeSelect";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Grid from "@mui/material/Grid";
+import Card from "@mui/material/Card";
+import CardHeader from "@mui/material/CardHeader";
+import Avatar from "@mui/material/Avatar";
+import CardActions from "@mui/material/CardActions";
+import IconButton from "@mui/material/IconButton";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import Typography from "@mui/material/Typography";
+import Collapse from "@mui/material/Collapse";
 
 import axios from "axios";
 
 function Home() {
-  const [lat, setLat] = useState(null);
-  const [lng, setLng] = useState(null);
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
   const [status, setStatus] = useState(null);
   const token = "1785ce5f17b42cf981e448dd3c07b4c5";
+  const [selectedCountry, setSelectedCountry] = useState("");
 
   const getLocation = () => {
     if (!navigator.geolocation) {
@@ -33,13 +41,19 @@ function Home() {
     }
   };
   let [responseData, setResponseData] = useState("");
-  const fetchData = React.useCallback(() => {
+
+  useEffect(() => {
+    getLocation();
+  }, []);
+  console.log("esto es donde se hace el fetch", lat, lng);
+
+  const fetchData = (updated1, updated2) => {
     axios({
       method: "GET",
       url: "https://api.openweathermap.org/data/2.5/weather?",
       params: {
-        lon: lng,
-        lat: lat,
+        lon: updated1,
+        lat: updated2,
         appid: token,
       },
     })
@@ -49,54 +63,125 @@ function Home() {
       .catch(error => {
         console.log(error);
       });
-  }, []);
+    console.log("a ver si llega", updated1, updated2);
+  };
 
   useEffect(() => {
-    getLocation();
-  }, []);
-
-  useEffect(() => {
-    if (lat && lng) {
-      fetchData();
+    if (lat != "" && lng != "") {
+      var updated1 = lat;
+      var updated2 = lng;
+      //setLng(lng);
+      fetchData(updated1, updated2);
     }
-  }, []);
-  const [country, setCountry] = useState("");
+  }, [lat, lng]);
 
   const handleChange = event => {
-    setCountry(event.target.value);
+    var selectedCountry = event.target.value;
+    //setCountry(event.target.value);
+    switch (selectedCountry) {
+      case 1:
+        setLat("-34.61315");
+        setLng("-58.37723");
+        setSelectedCountry("Argentina");
+        break;
+      case 2:
+        setLat("-15.7801");
+        setLng("-47.9292");
+        setSelectedCountry("Brasil");
+        break;
+      case 3:
+        setLat("-34.8833");
+        setLng("-56.1667");
+        setSelectedCountry("Uruguay");
+        break;
+      case 4:
+        setLat("-9.189967");
+        setLng("-75.015152");
+        setSelectedCountry("Perú");
+        break;
+      case 5:
+        setLat("-70.6482700");
+        setLng("-33.4569400");
+        setSelectedCountry("Chile");
+        break;
+      //default:
+      //Declaraciones ejecutadas cuando ninguno de los valores coincide con el valor de la expresión
+      //break;
+    }
+    console.log("averr", selectedCountry);
   };
+  console.log("la data final", responseData);
 
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <div
-          style={{
-            backgroundImage: `url("https://media.istockphoto.com/photos/blue-textured-background-picture-id1169630303?k=20&m=1169630303&s=612x612&w=0&h=Y7t-JqwJ69HP4L1lCu7dUAa0GV6GafQosWto7BrT_mc=")`,
-          }}
-        >
+        <div>
+          <Typography variant="h2" fontSize="24">
+            Bienvenido a AppClima
+          </Typography>
+          <Typography variant="h3">
+            Esta información es en base a su ubicación.
+          </Typography>
           <button onClick={getLocation}>Get Location</button>
-          <h1>Coordinates</h1>
+          <h1>Coordenadas de su ubicación</h1>
           <p>{status}</p>
+
           {lat && <p>Latitude: {lat}</p>}
           {lng && <p>Longitude: {lng}</p>}
-          <FormControl fullWidth>
+
+          <FormControl sx={{ m: 1, minWidth: 120 }}>
             <InputLabel id="demo-simple-select-label">
               Seleccione su ubicación
             </InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={"age"}
-              label="Age"
+              value={""}
+              label="Select"
               onChange={handleChange}
             >
-              <MenuItem value={10}>Argentina</MenuItem>
-              <MenuItem value={20}>Brasil</MenuItem>
-              <MenuItem value={30}>Uruguay</MenuItem>
-              <MenuItem value={20}>Perú</MenuItem>
-              <MenuItem value={30}>Chile</MenuItem>
+              <MenuItem value={1}>Argentina</MenuItem>
+              <MenuItem value={2}>Brasil</MenuItem>
+              <MenuItem value={3}>Uruguay</MenuItem>
+              <MenuItem value={4}>Perú</MenuItem>
+              <MenuItem value={5}>Chile</MenuItem>
             </Select>
           </FormControl>
+          {selectedCountry ? (
+            <Typography> País seleccionado: {selectedCountry}</Typography>
+          ) : null}
+          <Card sx={{ maxWidth: 345 }}>
+            <CardContent>
+              {responseData ? (
+                <div className="card card-body mt-2 animated fadeInUp">
+                  {responseData.main.temp && (
+                    <p>
+                      <i className="fas fa-temperature-low"></i> Temperatura:
+                      {responseData.main.temp} ℃
+                    </p>
+                  )}
+                  {responseData.weather[0].description && (
+                    <p>
+                      <i className="fas fa-temperature-low"></i> Descripción:
+                      {responseData.weather[0].description}
+                    </p>
+                  )}
+                  {responseData.main.humidity && (
+                    <p>
+                      <i className="fas fa-water"></i> Humedad:
+                      {responseData.main.humidity}
+                    </p>
+                  )}
+                  {responseData.main.wind_speed && (
+                    <p>
+                      <i className="fas fa-wind"></i> Velocidad del viento:
+                      {responseData.main.wind_speed}
+                    </p>
+                  )}
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
         </div>
       </Box>
     </>
